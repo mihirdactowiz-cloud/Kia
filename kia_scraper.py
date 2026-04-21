@@ -62,7 +62,7 @@ def get_state_city():
             all_locations.append({
                 "state": state,
                 "state_key": state_key,
-                "city": city.get("value"),
+                "city": city.get("value "),
                 "city_key": city.get("key")
             })
 
@@ -120,52 +120,8 @@ def process_all():
 
     return all_dealers
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-def process_single(loc):
-    data = get_dealers(loc.get("state_key"), loc.get("city_key"))
-
-    dealers = data.get("data", [])
-
-    result = []
-
-    for d in dealers:
-        result.append({
-            "state": loc.get("state"),
-            "city": loc.get("city"),
-            "name": d.get("dealerName"),
-            "address": ", ".join(filter(None, [
-                d.get("address1"),
-                d.get("address2"),
-                d.get("address3")
-            ])),
-            "phone": d.get("phone1") or d.get("phone2"),
-            "email": d.get("email"),
-            "website": d.get("website"),
-        })
-
-    return result
-
-def process_all_threaded():
-    locations = get_state_city()
-
-    all_dealers = []
-
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(process_single, loc) for loc in locations]
-
-        for future in as_completed(futures):
-            try:
-                result = future.result()
-                all_dealers.extend(result)
-            except Exception as e:
-                print("Thread error:", e)
-
-    return all_dealers
-
-
 if __name__ == "__main__":
-    data = process_all_threaded()
+    data = process_all ()
 
     print("\nTotal Dealers:", len(data))
 
